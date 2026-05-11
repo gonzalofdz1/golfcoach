@@ -1,0 +1,2159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Golf" />
+<meta name="theme-color" content="#0F3D2E" />
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230F3D2E'/><circle cx='90' cy='105' r='28' fill='%23FAF7F2'/><rect x='86' y='40' width='4' height='65' fill='%23FAF7F2'/><path d='M90 40 L130 50 L90 60 Z' fill='%23C45A2C'/></svg>" />
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230F3D2E'/><circle cx='90' cy='105' r='28' fill='%23FAF7F2'/><rect x='86' y='40' width='4' height='65' fill='%23FAF7F2'/><path d='M90 40 L130 50 L90 60 Z' fill='%23C45A2C'/></svg>" />
+<title>Golf Coach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF7F2;
+    --surface: #FFFFFF;
+    --surface-2: #F3EFE8;
+    --primary: #0F3D2E;
+    --primary-soft: #1F4D3D;
+    --accent: #C45A2C;
+    --accent-soft: #E07A4C;
+    --text: #1A1F1B;
+    --text-2: #6B6F6C;
+    --text-3: #9CA09D;
+    --border: #E4DED2;
+    --border-strong: #D0C8B8;
+    --success: #2E7D5B;
+    --danger: #B53A2C;
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'Manrope', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --safe-top: env(safe-area-inset-top, 0);
+    --safe-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, textarea, select { font-family: inherit; font-size: 16px; color: inherit; }
+
+  /* Layout */
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    padding-top: var(--safe-top);
+  }
+  .header {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .header .eyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-2);
+    font-weight: 600;
+  }
+  .header .title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 30px;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin-top: 2px;
+  }
+  .header .title em { font-style: italic; color: var(--accent); font-weight: 400; }
+  .header .sub {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-top: 4px;
+  }
+
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 100px;
+  }
+  .section { display: none; padding: 18px 22px 24px; }
+  .section.active { display: block; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: none; } }
+
+  /* Tab bar */
+  .tabs {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    background: rgba(250, 247, 242, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding: 8px 8px calc(8px + var(--safe-bottom));
+    z-index: 100;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 6px 8px;
+    text-align: center;
+    color: var(--text-3);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: color 0.18s;
+    position: relative;
+  }
+  .tab.active { color: var(--primary); }
+  .tab.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .tab svg { display: block; margin: 0 auto 3px; width: 22px; height: 22px; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+  .card-subtle {
+    font-size: 12px;
+    color: var(--text-2);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+  }
+
+  /* Today screen — checklist */
+  .day-banner {
+    background: var(--primary);
+    color: var(--bg);
+    border-radius: 16px;
+    padding: 22px 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .day-banner::after {
+    content: '';
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,90,44,0.25), transparent 70%);
+  }
+  .day-banner .label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    font-weight: 600;
+  }
+  .day-banner .name {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1.1;
+    margin-top: 6px;
+    letter-spacing: -0.01em;
+  }
+  .day-banner .meta {
+    margin-top: 14px;
+    font-size: 13px;
+    opacity: 0.85;
+    display: flex;
+    gap: 14px;
+  }
+  .day-banner .meta span { display: inline-flex; align-items: center; gap: 5px; }
+  .progress-ring {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+
+  .checklist { list-style: none; }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-box {
+    width: 24px;
+    height: 24px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 7px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.18s;
+    background: var(--surface);
+  }
+  .check-item.done .check-box {
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+  .check-item.done .check-box svg { opacity: 1; transform: scale(1); }
+  .check-box svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    color: var(--bg);
+  }
+  .check-content { flex: 1; min-width: 0; }
+  .check-label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    transition: all 0.2s;
+  }
+  .check-item.done .check-label {
+    text-decoration: line-through;
+    color: var(--text-3);
+  }
+  .check-target {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-2);
+    margin-top: 3px;
+    letter-spacing: -0.01em;
+  }
+
+  /* Note area */
+  .note-area {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+    color: var(--text);
+    resize: none;
+    min-height: 90px;
+    outline: none;
+    font-family: var(--sans);
+  }
+  .note-area:focus { border-color: var(--primary); background: var(--surface); }
+
+  /* Wedge tracker */
+  .wedge-grid {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .wedge-grid-header {
+    padding: 18px 18px 10px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .wedge-grid-header h3 {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .wedge-grid-header p {
+    font-size: 12px;
+    color: var(--text-2);
+    margin-top: 2px;
+  }
+  .wedge-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .wedge-table th {
+    font-family: var(--sans);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    color: var(--text-2);
+    padding: 12px 6px;
+    text-align: center;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .wedge-table th:first-child { text-align: left; padding-left: 18px; }
+  .wedge-table td {
+    padding: 18px 6px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .wedge-table td:first-child {
+    text-align: left;
+    padding-left: 18px;
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--primary);
+  }
+  .wedge-table tr:last-child td { border-bottom: none; }
+  .yardage {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .yardage .unit {
+    font-size: 10px;
+    color: var(--text-3);
+    margin-left: 2px;
+    font-weight: 400;
+  }
+  .yardage .empty {
+    color: var(--text-3);
+    font-size: 18px;
+  }
+  .sample-count {
+    display: block;
+    font-family: var(--sans);
+    font-size: 10px;
+    color: var(--text-3);
+    margin-top: 3px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  /* Logger */
+  .logger {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .logger h3 {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+  .pill-group {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .pill {
+    padding: 9px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--surface-2);
+    color: var(--text-2);
+    border: 1px solid transparent;
+    transition: all 0.15s;
+  }
+  .pill.active {
+    background: var(--primary);
+    color: var(--bg);
+  }
+  .pill-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-2);
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .number-input {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 26px;
+    font-weight: 500;
+    text-align: center;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    -moz-appearance: textfield;
+  }
+  .number-input::-webkit-outer-spin-button,
+  .number-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .number-input:focus { border-color: var(--primary); background: var(--surface); }
+
+  .btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--primary);
+    color: var(--bg);
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    transition: all 0.15s;
+    margin-top: 14px;
+  }
+  .btn:active { transform: scale(0.98); background: var(--primary-soft); }
+  .btn:disabled { opacity: 0.4; }
+  .btn.secondary {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn.danger { background: var(--danger); }
+
+  .input-row { display: flex; gap: 10px; }
+  .input-row > * { flex: 1; }
+
+  /* History list */
+  .history-list { margin-top: 10px; }
+  .history-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .history-entry:last-child { border-bottom: none; }
+  .history-entry .meta { color: var(--text-2); font-size: 12px; }
+  .history-entry .value { font-family: var(--mono); font-weight: 600; }
+
+  /* Stats badges */
+  .stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-card .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-2);
+    font-weight: 600;
+  }
+  .stat-card .value {
+    font-family: var(--mono);
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--primary);
+    margin-top: 4px;
+    letter-spacing: -0.02em;
+  }
+  .stat-card .value.accent { color: var(--accent); }
+
+  .empty-state {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--text-3);
+    font-size: 14px;
+  }
+
+  /* Day picker (allow override) */
+  .day-switcher {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    margin-bottom: 16px;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .day-switcher::-webkit-scrollbar { display: none; }
+  .day-pill {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--surface);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .day-pill.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: calc(80px + var(--safe-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 12px 20px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 200;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Section header inside tab */
+  .sec-head {
+    margin-bottom: 12px;
+  }
+  .sec-head h2 {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+  .sec-head h2 em { font-style: italic; color: var(--accent); font-weight: 400; }
+  .sec-head p {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-top: 4px;
+  }
+
+  /* Mode toggle */
+  .mode-toggle {
+    display: flex;
+    background: var(--surface-2);
+    border-radius: 100px;
+    padding: 4px;
+    margin-bottom: 16px;
+  }
+  .mode-toggle button {
+    flex: 1;
+    padding: 9px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+    transition: all 0.18s;
+  }
+  .mode-toggle button.active {
+    background: var(--surface);
+    color: var(--primary);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  /* Putt counter */
+  .counter-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .counter-row:last-child { border-bottom: none; }
+  .counter-row .name {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .counter-row .name small {
+    display: block;
+    font-size: 11px;
+    color: var(--text-2);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+  .counter-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+  }
+  .counter-btn.add { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .counter-value {
+    font-family: var(--mono);
+    font-weight: 600;
+    min-width: 28px;
+    text-align: center;
+  }
+
+  /* Gym exercise list */
+  .exercise-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .exercise-item:active { border-color: var(--primary); }
+  .exercise-item .info {
+    flex: 1;
+    min-width: 0;
+  }
+  .exercise-item .name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .exercise-item .last {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-2);
+    margin-top: 3px;
+    letter-spacing: -0.01em;
+  }
+  .exercise-item .arrow {
+    color: var(--text-3);
+    font-size: 18px;
+    margin-left: 10px;
+  }
+  .exercise-group-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-2);
+    font-weight: 600;
+    margin: 18px 4px 8px;
+  }
+  .exercise-group-title:first-child { margin-top: 4px; }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 31, 27, 0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    width: 100%;
+    max-width: 520px;
+    background: var(--surface);
+    border-radius: 22px 22px 0 0;
+    padding: 22px 22px calc(22px + var(--safe-bottom));
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: none; } }
+  .modal h3 {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+  .modal .sub { color: var(--text-2); font-size: 13px; margin-bottom: 18px; }
+  .modal .row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .modal .row > * { flex: 1; }
+  .modal-input {
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 500;
+    text-align: center;
+    color: var(--text);
+    outline: none;
+    width: 100%;
+  }
+  .modal-input:focus { border-color: var(--primary); background: var(--surface); }
+  .modal-input-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-2);
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+  }
+  .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+  .modal-actions button { flex: 1; }
+
+  /* History past days link */
+  .past-days-link {
+    text-align: center;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px;
+    margin-top: 6px;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  /* Past days view */
+  .past-day {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .past-day .date {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--primary);
+  }
+  .past-day .completion {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-2);
+    margin-top: 2px;
+    letter-spacing: 0.02em;
+  }
+  .past-day .note {
+    font-size: 13px;
+    color: var(--text);
+    margin-top: 8px;
+    line-height: 1.5;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Helper utilities */
+  .row-flex { display: flex; align-items: center; justify-content: space-between; }
+  .mb-2 { margin-bottom: 8px; }
+  .mb-3 { margin-bottom: 14px; }
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 14px; }
+  .text-secondary { color: var(--text-2); font-size: 13px; }
+  .quote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.5;
+    padding: 14px 18px;
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    margin-bottom: 14px;
+    border-radius: 0 10px 10px 0;
+  }
+
+  /* Header icon (data menu) */
+  .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .header .text { flex: 1; min-width: 0; }
+  .header-icon {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-2);
+    flex-shrink: 0; margin-top: 4px;
+  }
+  .header-icon svg { width: 18px; height: 18px; }
+  .header-icon:active { background: var(--surface-2); }
+
+  /* Goal/expand on checklist items */
+  .check-goal {
+    font-size: 13px;
+    color: var(--accent);
+    margin-top: 5px;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .check-goal::before {
+    content: '◎';
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.3;
+    flex-shrink: 0;
+  }
+  .check-item.done .check-goal { color: var(--text-3); }
+  .check-expand-btn {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--text-2);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+  }
+  .check-expand-btn svg {
+    width: 11px; height: 11px;
+    transition: transform 0.2s;
+  }
+  .check-item.expanded .check-expand-btn svg { transform: rotate(180deg); }
+  .check-details {
+    display: none;
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border-radius: 10px;
+    border-left: 3px solid var(--primary);
+  }
+  .check-item.expanded .check-details { display: block; }
+  .check-details .row-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-2);
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .check-details .row-content {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .check-details .row-content + .row-label { margin-top: 12px; }
+
+  /* Technique block (used in gym modal) */
+  .technique-block {
+    background: var(--surface-2);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .technique-block h4 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-2);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .technique-block p {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text);
+  }
+  .technique-block ul { list-style: none; margin-top: 6px; }
+  .technique-block li {
+    font-size: 13px;
+    line-height: 1.55;
+    padding-left: 18px;
+    position: relative;
+    margin-bottom: 5px;
+  }
+  .technique-block li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .technique-block.warning {
+    background: #FDF2EE;
+    border-left: 3px solid var(--accent);
+  }
+
+  /* Outline button + data textarea */
+  .btn.outline {
+    background: var(--surface);
+    color: var(--primary);
+    border: 1.5px solid var(--primary);
+  }
+  .data-textarea {
+    width: 100%;
+    min-height: 130px;
+    padding: 12px;
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text);
+    outline: none;
+    resize: vertical;
+  }
+
+  /* Tappable wedge cells */
+  .wedge-cell {
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .wedge-cell:active { background: var(--surface-2); }
+  .wedge-cell::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 8px;
+    pointer-events: none;
+    border: 1px dashed transparent;
+    transition: border-color 0.15s;
+  }
+  .wedge-cell:active::after { border-color: var(--accent); }
+
+  /* Mobile fixes: prevent layout breaks on narrow screens */
+  @media (max-width: 380px) {
+    .header { padding: 16px 18px 12px; }
+    .header .title { font-size: 26px; }
+    .section { padding: 16px 18px 24px; }
+    .day-banner { padding: 18px 16px; }
+    .day-banner .name { font-size: 22px; padding-right: 50px; }
+    .day-banner .meta { font-size: 12px; padding-right: 50px; flex-wrap: wrap; }
+    .progress-ring { right: 12px; }
+    .wedge-table td, .wedge-table th { padding: 14px 4px; }
+    .wedge-table td:first-child { padding-left: 14px; }
+    .wedge-table th:first-child { padding-left: 14px; }
+    .yardage { font-size: 19px; }
+    .check-label { gap: 8px; }
+    .label-target { font-size: 10px; }
+    .pill { padding: 8px 12px; font-size: 12px; }
+  }
+  /* On very narrow screens, stack the label and target instead of side-by-side */
+  @media (max-width: 340px) {
+    .check-label { flex-direction: column; align-items: flex-start; gap: 2px; }
+    .label-target { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header" id="header">
+    <!-- dynamic -->
+  </header>
+
+  <main class="main">
+    <!-- HOY -->
+    <section class="section active" id="sec-hoy">
+      <div id="hoy-content"></div>
+    </section>
+
+    <!-- WEDGES -->
+    <section class="section" id="sec-wedges">
+      <div class="sec-head">
+        <h2>Tabla de <em>wedges</em></h2>
+        <p>Toca cualquier celda para registrar el promedio de tu sesión.</p>
+      </div>
+
+      <div class="quote">
+        En el campo: distancia × wedge × longitud de swing. La columna que coincida con tu yardaje es tu tiro.
+      </div>
+
+      <div id="wedge-table-container"></div>
+
+      <div class="card">
+        <div class="row-flex mb-3">
+          <h3 class="card-title" style="margin-bottom:0">Sesiones recientes</h3>
+          <button class="text-secondary" id="wedge-clear-btn" style="font-size:12px;">Limpiar</button>
+        </div>
+        <div id="wedge-history" class="history-list"></div>
+      </div>
+    </section>
+
+    <!-- PUTTS -->
+    <section class="section" id="sec-putts">
+      <div class="sec-head">
+        <h2>Bitácora de <em>putt</em></h2>
+        <p>Foco para ti: control de distancia (la lectura ya la tienes).</p>
+      </div>
+
+      <div id="putt-stats"></div>
+
+      <div class="logger">
+        <h3>Sesión de hoy</h3>
+        <p class="text-secondary mb-3">Registra tu práctica de putt. Suma con + y -.</p>
+
+        <div class="exercise-group-title">Ladder drill (control de distancia)</div>
+        <div class="card" style="padding: 6px 18px; margin-bottom: 14px;">
+          <div class="counter-row">
+            <div class="name">6 metros<small>Bolas paradas dentro de 1m del hoyo</small></div>
+            <button class="counter-btn" data-putt-key="ladder_6" data-action="dec">−</button>
+            <span class="counter-value" id="cnt-ladder_6">0/4</span>
+            <button class="counter-btn add" data-putt-key="ladder_6" data-action="inc">+</button>
+          </div>
+          <div class="counter-row">
+            <div class="name">12 metros<small>Bolas paradas dentro de 1m</small></div>
+            <button class="counter-btn" data-putt-key="ladder_12" data-action="dec">−</button>
+            <span class="counter-value" id="cnt-ladder_12">0/4</span>
+            <button class="counter-btn add" data-putt-key="ladder_12" data-action="inc">+</button>
+          </div>
+          <div class="counter-row">
+            <div class="name">18 metros<small>Bolas paradas dentro de 1m</small></div>
+            <button class="counter-btn" data-putt-key="ladder_18" data-action="dec">−</button>
+            <span class="counter-value" id="cnt-ladder_18">0/4</span>
+            <button class="counter-btn add" data-putt-key="ladder_18" data-action="inc">+</button>
+          </div>
+          <div class="counter-row">
+            <div class="name">24 metros<small>Bolas paradas dentro de 1m</small></div>
+            <button class="counter-btn" data-putt-key="ladder_24" data-action="dec">−</button>
+            <span class="counter-value" id="cnt-ladder_24">0/4</span>
+            <button class="counter-btn add" data-putt-key="ladder_24" data-action="inc">+</button>
+          </div>
+        </div>
+
+        <div class="exercise-group-title">Putts cortos (presión)</div>
+        <div class="card" style="padding: 6px 18px; margin-bottom: 14px;">
+          <div class="counter-row">
+            <div class="name">1 metro<small>Embocados de 10 intentos</small></div>
+            <button class="counter-btn" data-putt-key="short_1" data-action="dec">−</button>
+            <span class="counter-value" id="cnt-short_1">0/10</span>
+            <button class="counter-btn add" data-putt-key="short_1" data-action="inc">+</button>
+          </div>
+          <div class="counter-row">
+            <div class="name">2 metros<small>Embocados de 10</small></div>
+            <button class="counter-btn" data-putt-key="short_2" data-action="dec">−</button>
+            <span class="counter-value" id="cnt-short_2">0/10</span>
+            <button class="counter-btn add" data-putt-key="short_2" data-action="inc">+</button>
+          </div>
+          <div class="counter-row">
+            <div class="name">3 metros<small>Embocados de 10</small></div>
+            <button class="counter-btn" data-putt-key="short_3" data-action="dec">−</button>
+            <span class="counter-value" id="cnt-short_3">0/10</span>
+            <button class="counter-btn add" data-putt-key="short_3" data-action="inc">+</button>
+          </div>
+        </div>
+
+        <button class="btn" id="putt-save-btn">Guardar sesión</button>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Sesiones recientes</h3>
+        <div id="putt-history" class="history-list"></div>
+      </div>
+    </section>
+
+    <!-- GYM -->
+    <section class="section" id="sec-gym">
+      <div class="sec-head">
+        <h2>Bitácora de <em>gym</em></h2>
+        <p>Registra peso, reps y series. Cada vez intenta igualar o superar el último.</p>
+      </div>
+
+      <div id="gym-list"></div>
+    </section>
+  </main>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="hoy">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 22V12h6v10"/><path d="M3 9.5L12 2l9 7.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5z"/></svg>
+      Hoy
+    </button>
+    <button class="tab" data-tab="wedges">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
+      Wedges
+    </button>
+    <button class="tab" data-tab="putts">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="6" cy="18" r="2.5"/><path d="M6 15.5V4M6 4l11 3M6 7l9 2.5"/></svg>
+      Putts
+    </button>
+    <button class="tab" data-tab="gym">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6.5 6.5L17.5 17.5M3 10v4M21 10v4M7 7v10M17 7v10"/></svg>
+      Gym
+    </button>
+  </nav>
+</div>
+
+<div class="toast" id="toast">Guardado</div>
+
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+// ============ DATA MODEL ============
+const STORAGE_KEY = 'golf-coach-v1';
+const DAYS_ES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+const ROUTINES = {
+  sim_wedge: {
+    name: 'Sim — Rutina B (Wedges)', duration: '45 min',
+    items: [
+      { id: 'sw_warmup', label: 'Calentamiento progresivo', target: '5 min',
+        goal: 'Despertar el swing y sentir el contacto sin pensar en data',
+        setup: 'PW → 9i → 7i, 4 bolas con cada uno al 50% de esfuerzo. Modo Range Analysis. No mires los números todavía.',
+        cue: 'Tempo lento e idéntico entre bola y bola.' },
+      { id: 'sw_56_30', label: '56° → 30 yds', target: '8 bolas',
+        goal: 'Carry promedio dentro de 27–33 yds (±3 del objetivo)',
+        setup: 'Pin virtual a 30 yds. Modo Range para ver Carry y dispersión por tiro. Swing 9 en punto: manos no pasan del hombro en el backswing.',
+        cue: 'Manos pasivas — el cuerpo gira primero, los brazos siguen. Tempo es lo único que cambia, no fuerza.' },
+      { id: 'sw_56_50', label: '56° → 50 yds', target: '8 bolas',
+        goal: 'Carry promedio dentro de 47–53 yds',
+        setup: 'Pin a 50 yds. Swing 10:30 (manos a la altura del hombro en backswing). Mira Carry.',
+        cue: 'Mismo tempo que el swing anterior, mayor amplitud — no más rápido.' },
+      { id: 'sw_56_70', label: '56° → 70 yds', target: '8 bolas',
+        goal: 'Carry promedio dentro de 65–75 yds (±5)',
+        setup: 'Pin a 70 yds. Swing completo del 56°. Anota Carry y Spin Rate.',
+        cue: 'Compresión: dale a la bola, después al pasto. No intentes "ayudarla" a subir.' },
+      { id: 'sw_52_60', label: '52° → 60 yds', target: '8 bolas',
+        goal: 'Carry promedio dentro de 57–63 yds',
+        setup: 'Pin a 60 yds. Swing 9 en punto del 52° (gap wedge).',
+        cue: 'Mismo movimiento que el 56° — solo cambia el palo. No fuerces más velocidad.' },
+      { id: 'sw_52_80', label: '52° → 80 yds', target: '8 bolas',
+        goal: 'Carry promedio dentro de 77–83 yds',
+        setup: 'Pin a 80 yds. Swing 10:30 del 52°. Mira Carry y dispersión lateral.',
+        cue: 'El tempo es rey. Si la dispersión sube, baja el ritmo.' },
+      { id: 'sw_52_90', label: '52° → 90 yds', target: '8 bolas',
+        goal: 'Carry promedio dentro de 85–95 yds (±5)',
+        setup: 'Pin a 90 yds. Swing completo del 52°.',
+        cue: 'No fuerces a 100 — es el rango del 52° completo, respeta su distancia.' },
+      { id: 'sw_pw_100', label: 'PW → 100 yds', target: '8 bolas',
+        goal: 'Carry promedio dentro de 97–103 yds',
+        setup: 'Pin a 100 yds. Swing controlado de la PW (80%, no completo).',
+        cue: 'Aquí ya no es swing al 100%. Es ritmo controlado.' },
+      { id: 'sw_pw_110', label: 'PW → 110 yds', target: '8 bolas',
+        goal: 'Carry promedio dentro de 105–115 yds (±5)',
+        setup: 'Pin a 110 yds. Swing completo de la PW.',
+        cue: 'La dispersión lateral importa más que la distancia exacta — es el tiro de aproximación.' },
+      { id: 'sw_chal', label: 'Shot challenge', target: '10 min · 10–15 tiros',
+        goal: 'Acertar el palo y swing ANTES de pegar (esto vale más que el carry exacto)',
+        setup: 'Genera distancias random entre 30 y 100 yds (cambia el pin cada vez). Antes de pegar, di en voz alta: "X palo, swing Y". Pega. Compara con tu tabla.',
+        cue: 'Estás entrenando la DECISIÓN, no el swing. Confía en tu tabla.' }
+    ]
+  },
+  sim_driver: {
+    name: 'Sim — Rutina A (Driver)', duration: '45 min',
+    items: [
+      { id: 'sd_warmup', label: 'Calentamiento progresivo', target: '5 min',
+        goal: 'Activar el cuerpo y centrar el contacto antes de subir velocidad',
+        setup: 'PW → 9i → 7i, 3–4 bolas con cada uno al 50%.',
+        cue: 'No mires data. Solo siente.' },
+      { id: 'sd_7i', label: '7i a 70% — calibración base', target: '10 min · 10–12 bolas',
+        goal: 'Smash factor consistente arriba de 1.30',
+        setup: 'Modo Range. Swing al 70% de esfuerzo. Mira Smash Factor y Low Point en cada bola.',
+        cue: 'Si bajas de 1.30, estás golpeando del talón o la punta. Centra el contacto antes de subir velocidad.' },
+      { id: 'sd_driver', label: 'Driver con "puerta" 20 yds derecha', target: '20 min · 20–30 bolas',
+        goal: '7 de 10 bolas pasan por una "puerta" imaginaria 20 yds a la derecha de la línea',
+        setup: 'Driver. Mira Club Path y Face to Path en cada bola. Imagina un cono virtual a 20 yds a la derecha del fairway. Tu intención: pasar por ahí.',
+        cue: 'Termina con manos altas y hombros abiertos al objetivo. Si Face to Path está en −3° o más cerrado, ahí está tu pull izquierdo.' },
+      { id: 'sd_play', label: 'Play hole mode (simulación)', target: '10 min · 3 par 4',
+        goal: 'Aterrizar driver en fairway en 2 de 3 hoyos',
+        setup: 'CAMBIA el modo del Trackman a Play Hole / Virtual Course. Elige 3 par 4 de 380–420 yds. Driver del tee, hierro al green.',
+        cue: 'Aquí el goal es ESTRATEGIA, no swing. Aplica: tee del lado izquierdo, apunta al lado derecho del fairway.' }
+    ]
+  },
+  club_a: {
+    name: 'Club + Gym A', duration: '~3.5 h',
+    items: [
+      { id: 'ca_ladder', label: 'Ladder drill', target: '15 min · 16 putts',
+        goal: '3 de 4 bolas dentro de 1m del hoyo en cada distancia',
+        setup: 'Marca distancias 6m, 12m, 18m, 24m con tee. 4 bolas en cada una.',
+        cue: 'No mires al hoyo, mira al círculo mental de 1m de radio. Velocidad antes que línea.' },
+      { id: 'ca_lag', label: 'Lag putt random', target: '15 min · 10 putts',
+        goal: '8 de 10 paran dentro de 1m del hoyo',
+        setup: 'Posiciones aleatorias entre 15 y 25 m, distintas cada putt.',
+        cue: 'A esta distancia la línea casi no importa — la velocidad es todo.' },
+      { id: 'ca_short', label: 'Putts cortos de presión', target: '15 min',
+        goal: 'Hacer 3 seguidos antes de avanzar de distancia',
+        setup: 'Empieza en 1m → 2m → 3m. Si fallas en cualquier distancia, regresas a 0 en ese nivel.',
+        cue: 'Construyes nervio, no técnica. Acepta el nervio, no lo pelees.' },
+      { id: 'ca_chip', label: 'Chip 3–15m, varios palos', target: '20 min',
+        goal: 'Entender la relación carry/roll de cada palo',
+        setup: 'Mismo lie, mismo target. 3 chips con PW, 3 con 9i, 3 con 8i. Anota dónde aterriza y dónde para cada uno.',
+        cue: 'Esto no es para perfeccionar — es para SABER. La info te da opciones según el lie.' },
+      { id: 'ca_pitch', label: 'Pitch 30–80 yds (matriz wedges)', target: '30 min',
+        goal: 'Dispersión menor a 5 yds por combinación palo/swing',
+        setup: 'Mismo formato que el sim: 56° (30/50/70), 52° (60/80/90), PW (100/110). Pero con bola real.',
+        cue: 'Los datos del sim son referencia, esto es la verdad — viento, lie, presión real.' },
+      { id: 'ca_bunker', label: 'Bunker básico', target: '10 min',
+        goal: '8 de 10 salidas paran en el green',
+        setup: '60° o 56°. Cara abierta, base abierta. Foco en el punto 5cm detrás de la bola.',
+        cue: 'Dale a la arena, no a la bola. La arena es la que empuja la bola fuera.' },
+      { id: 'ca_range', label: 'Range — calentamiento', target: '15 min',
+        goal: 'Activar todo el bag antes del gym',
+        setup: '5 PW + 5 hierro 8 + 5 hierro 6 + 5 driver, todos al 80%.',
+        cue: 'No hagas range completo — te falta gym todavía.' },
+      { id: 'ca_g1', label: 'Goblet squat', target: '3 × 10',
+        goal: 'Igualar o superar el peso del último registro',
+        setup: 'Mancuerna sostenida al pecho con ambas manos.',
+        cue: 'Codos bajan entre las rodillas, pecho arriba.' },
+      { id: 'ca_g2', label: 'RDL con mancuerna', target: '3 × 10',
+        goal: 'Mismo peso, baja con control en 3 segundos',
+        setup: 'Mancuerna en cada mano. Cadera atrás, columna neutral.',
+        cue: 'No bajas — mandas la cadera atrás. Las mancuernas raspan los muslos.' },
+      { id: 'ca_g3', label: 'Step-up unilateral', target: '3 × 8 c/pierna',
+        goal: 'Subir SIN empujarse con la pierna de abajo',
+        setup: 'Banco a la altura de la rodilla. Mancuerna en cada mano.',
+        cue: 'Sube con la pierna de arriba. La de abajo solo toca el suelo, no empuja.' },
+      { id: 'ca_g4', label: 'Pallof press', target: '3 × 12 c/lado',
+        goal: 'Cero rotación del tronco bajo carga',
+        setup: 'Polea o banda a la altura del pecho, anclada a un lado. Sujeta con dos manos al pecho, extiende al frente sin girar.',
+        cue: 'Si te tuerce el cuerpo, baja el peso. Es ANTI-rotación, no rotación.' },
+      { id: 'ca_g5', label: 'Suitcase carry', target: '3 × 30m c/lado',
+        goal: 'Caminar sin inclinarte hacia el lado del peso',
+        setup: 'Mancuerna pesada en una mano. Camina en línea recta.',
+        cue: 'Hombro alto del lado del peso. El core te mantiene vertical.' }
+    ]
+  },
+  club_b: {
+    name: 'Club + Gym B', duration: '~3.5 h',
+    items: [
+      { id: 'cb_ladder', label: 'Ladder drill', target: '15 min · 16 putts',
+        goal: '3 de 4 bolas dentro de 1m del hoyo en cada distancia',
+        setup: 'Marca distancias 6m, 12m, 18m, 24m con tee. 4 bolas en cada una.',
+        cue: 'Velocidad antes que línea.' },
+      { id: 'cb_lag', label: 'Lag putt random', target: '15 min · 10 putts',
+        goal: '8 de 10 paran dentro de 1m del hoyo',
+        setup: 'Posiciones aleatorias entre 15 y 25 m.',
+        cue: 'Velocidad es todo a esta distancia.' },
+      { id: 'cb_short', label: 'Putts cortos de presión', target: '15 min',
+        goal: 'Hacer 3 seguidos antes de avanzar de distancia',
+        setup: '1m → 2m → 3m. Falla = regresas a 0 en ese nivel.',
+        cue: 'Construir confianza bajo presión real.' },
+      { id: 'cb_chip', label: 'Chip 3–15m, varios palos', target: '20 min',
+        goal: 'Entender la relación carry/roll de cada palo',
+        setup: 'Mismo lie, mismo target. 3 chips con PW, 9i, 8i.',
+        cue: 'Esto te da opciones según el lie del campo.' },
+      { id: 'cb_pitch', label: 'Pitch 30–80 yds (matriz wedges)', target: '30 min',
+        goal: 'Dispersión menor a 5 yds por combinación',
+        setup: 'Misma matriz del sim, con bola real.',
+        cue: 'La verdad del campo > la verdad del sim.' },
+      { id: 'cb_bunker', label: 'Bunker básico', target: '10 min',
+        goal: '8 de 10 salidas paran en el green',
+        setup: '60° o 56°, cara abierta, golpea 5cm detrás de la bola.',
+        cue: 'Dale a la arena, no a la bola.' },
+      { id: 'cb_range', label: 'Range — calentamiento', target: '15 min',
+        goal: 'Activar todo el bag antes del gym',
+        setup: '5 PW + 5 hierro 8 + 5 hierro 6 + 5 driver, todos al 80%.',
+        cue: 'Reservas energía para el gym.' },
+      { id: 'cb_g1', label: 'Press inclinado mancuerna', target: '3 × 10',
+        goal: 'Igualar o superar el peso anterior',
+        setup: 'Banco a 30°. Mancuernas, codos a 45° del cuerpo.',
+        cue: 'Baja al pecho, no a la cara.' },
+      { id: 'cb_g2', label: 'Remo sentado', target: '3 × 10',
+        goal: 'Mismo o más peso que la última vez',
+        setup: 'Sentado en máquina o con polea baja.',
+        cue: 'Codos pegados al cuerpo, junta omóplatos al final.' },
+      { id: 'cb_g3', label: 'Face pulls', target: '3 × 15',
+        goal: 'Postura limpia — ORO para tu swing',
+        setup: 'Polea a la altura de la cara, con cuerda. Tira la cuerda hacia tu cara.',
+        cue: 'Codos altos, las manos pasan junto a las orejas. Sin peso pesado.' },
+      { id: 'cb_g4', label: 'Bird dog', target: '3 × 10 c/lado',
+        goal: 'Estabilidad sin compensar — cadera no rota',
+        setup: 'En cuatro apoyos. Extiende brazo opuesto a pierna.',
+        cue: 'Si sientes que la cadera se gira, frena.' },
+      { id: 'cb_g5', label: 'Dead bug con peso', target: '3 × 12 c/lado',
+        goal: 'Cero arqueo de espalda baja',
+        setup: 'Boca arriba. Brazos hacia el techo, piernas a 90° (rodillas sobre cadera). Baja brazo opuesto a pierna estirada.',
+        cue: 'Lumbar PEGADA al piso TODO el tiempo. Si se despega, frena.' },
+      { id: 'cb_g6', label: 'Hangs pasivos en barra', target: '3 × 30s',
+        goal: 'Liberar la columna después del castigo del swing',
+        setup: 'Cuelga de la barra de dominadas, cuerpo relajado. Pies fuera del piso.',
+        cue: 'Suelta los hombros. No es para fortalecer, es para descomprimir.' }
+    ]
+  },
+  rest: {
+    name: 'Descanso', duration: 'Día libre',
+    items: [
+      { id: 'r_walk', label: 'Caminata ligera o estiramiento', target: '20–30 min · opcional',
+        goal: 'Recuperación activa, sin esfuerzo',
+        setup: 'Caminata fácil al aire libre o rutina de movilidad de cadera + T-spine.',
+        cue: 'Que no acelere tu pulso significativamente.' },
+      { id: 'r_sim', label: 'Sim ligero', target: 'opcional · 20–30 min',
+        goal: 'Mantener feeling, no cargar fatiga',
+        setup: 'Solo si el cuerpo está fresco. PW + 9i + 7i, 50–70% de esfuerzo. Sin metas de carry.',
+        cue: 'Si dudas, no lo hagas. El descanso suma.' }
+    ]
+  }
+};
+
+// 0=Domingo, 1=Lunes...
+const SCHEDULE = {
+  0: 'sim_wedge',     // Domingo
+  1: 'sim_wedge',     // Lunes
+  2: 'rest',          // Martes
+  3: 'club_a',        // Miércoles
+  4: 'sim_driver',    // Jueves
+  5: 'rest',          // Viernes
+  6: 'club_b'         // Sábado
+};
+
+const GYM_EXERCISES = {
+  'Gym A — Piernas + Anti-rotación': [
+    { id: 'goblet_squat', name: 'Goblet squat', target: '3 × 10',
+      description: 'Sentadilla con mancuerna sostenida al pecho. Patrón base de fuerza de piernas con tronco erguido.',
+      cues: ['Mancuerna pegada al pecho, codos abajo', 'Pies a la anchura de hombros, ligeramente abiertos', 'Baja con cadera atrás, rodillas siguen los pies', 'Pecho arriba, ojos al frente', 'Sube empujando el piso con los talones'],
+      mistakes: 'Curvar la espalda baja al subir, rodillas que se meten hacia adentro.' },
+    { id: 'rdl_mancuerna', name: 'RDL con mancuerna', target: '3 × 10',
+      description: 'Romanian Deadlift. Bisagra de cadera para fortalecer cadena posterior (glúteos, isquios, lumbar).',
+      cues: ['Mancuerna en cada mano, junto a los muslos', 'Rodillas ligeramente flexionadas, NO sentadilla', 'Manda la CADERA atrás, no bajes el cuerpo', 'Las mancuernas raspan los muslos al bajar', 'Baja hasta sentir tensión en isquios, no más', 'Sube empujando la cadera al frente'],
+      mistakes: 'Doblar la espalda baja, hacer sentadilla en lugar de bisagra, bajar más allá del rango cómodo.' },
+    { id: 'step_up', name: 'Step-up unilateral', target: '3 × 8 c/pierna',
+      description: 'Subida unilateral a banco. Fuerza de pierna individual + estabilidad.',
+      cues: ['Banco a la altura de la rodilla', 'Pie completo en el banco, no solo punta', 'Sube SOLO con la pierna de arriba', 'La pierna de abajo no empuja, solo toca el suelo', 'Baja con control, 2 segundos'],
+      mistakes: 'Empujarse con la pierna de abajo (lo más común), banco demasiado alto, dejar que la rodilla de arriba colapse hacia adentro.' },
+    { id: 'pallof_press', name: 'Pallof press', target: '3 × 12 c/lado',
+      description: 'Anti-rotación del core. Esencial para tu swing — entrena al core a NO rotar bajo carga.',
+      cues: ['Polea o banda a la altura del pecho, anclada a un lado', 'Párate perpendicular al anclaje', 'Sujeta el agarre con ambas manos al pecho', 'Extiende los brazos al frente, RESISTE el giro', 'Pausa 2 segundos al frente, regresa con control'],
+      mistakes: 'Peso muy alto que te tuerce. Bajas reps con buena técnica > altas reps con torsión.' },
+    { id: 'suitcase_carry', name: 'Suitcase carry', target: '3 × 30m c/lado',
+      description: 'Caminata con peso en una sola mano. Anti-flexión lateral + grip + core.',
+      cues: ['Mancuerna pesada en una mano, brazo a un lado', 'Hombro del lado del peso ALTO, no se hunde', 'Camina en línea recta, pasos normales', 'Cabeza arriba, hombros atrás', 'Cambia de mano al regresar'],
+      mistakes: 'Inclinarte hacia el lado del peso. Si pasa, baja peso.' }
+  ],
+  'Gym B — Empuje, tracción + espalda': [
+    { id: 'press_inclinado', name: 'Press inclinado mancuerna', target: '3 × 10',
+      description: 'Press de pecho con banco inclinado. Trabaja pecho superior y hombros.',
+      cues: ['Banco a 30° (no más empinado)', 'Mancuernas a la altura del pecho, palmas al frente', 'Codos a 45° del cuerpo, no abiertos a 90°', 'Empuja arriba, mancuernas se acercan al final', 'Baja con control hasta el pecho'],
+      mistakes: 'Bajar las mancuernas hacia la cara, codos abiertos demasiado.' },
+    { id: 'remo_sentado', name: 'Remo sentado', target: '3 × 10',
+      description: 'Tracción horizontal. Espalda media + corrige postura redondeada.',
+      cues: ['Sentado en máquina o con polea baja y agarre cerrado', 'Pecho arriba, hombros atrás antes de empezar', 'Tira de los codos hacia atrás, pegados al cuerpo', 'Junta omóplatos al final del movimiento', 'Estira al frente con control'],
+      mistakes: 'Tirar con la espalda baja en lugar de los hombros, encoger los hombros al final.' },
+    { id: 'face_pulls', name: 'Face pulls', target: '3 × 15',
+      description: 'Tracción alta hacia la cara con cuerda. ORO para tu swing — corrige hombros redondeados.',
+      cues: ['Polea a la altura de la cara, con cuerda', 'Tira la cuerda hacia TU cara, separando las manos', 'Codos altos (a la altura del hombro o más arriba)', 'Las manos pasan junto a las orejas', 'Pausa breve al final, suelta con control'],
+      mistakes: 'Peso pesado (no lo necesita), codos bajos, tirar al pecho en vez de la cara.' },
+    { id: 'bird_dog', name: 'Bird dog', target: '3 × 10 c/lado',
+      description: 'Estabilidad de core + coordinación cruzada. Brazo y pierna opuestos.',
+      cues: ['En cuatro apoyos: manos bajo hombros, rodillas bajo cadera', 'Espalda neutra (no jorobada, no arqueada)', 'Extiende brazo derecho + pierna izquierda al mismo tiempo', 'Cadera no rota — queda paralela al piso', 'Pausa 2 segundos, regresa con control, alterna lado'],
+      mistakes: 'Cadera que se gira hacia el lado de la pierna extendida (lo más común). Pega un palo de escoba en la lumbar para sentirlo.' },
+    { id: 'dead_bug', name: 'Dead bug con peso', target: '3 × 12 c/lado',
+      description: 'Estabilidad anti-extensión del core. Lumbar pegada al piso siempre.',
+      cues: ['Boca arriba, lumbar PEGADA al piso', 'Brazos hacia el techo, piernas a 90° (rodillas sobre cadera)', 'Sostén una mancuerna ligera en cada mano (opcional)', 'Baja brazo derecho atrás + pierna izquierda al frente', 'Lumbar SIGUE pegada al piso TODO el tiempo'],
+      mistakes: 'Despegar la lumbar (espalda se arquea). Si pasa, no bajes tan abajo.' },
+    { id: 'hangs', name: 'Hangs pasivos en barra', target: '3 × 30s',
+      description: 'Cuelgue pasivo. Descomprime la columna después del estrés del swing.',
+      cues: ['Sujeta la barra con agarre prono, manos a la anchura de hombros', 'Pies fuera del piso, cuerpo relajado', 'Hombros sueltos — NO los tenses arriba', 'Respira normal, deja que la gravedad estire', 'Suelta antes de perder agarre por completo'],
+      mistakes: 'Tensar los hombros (es lo opuesto del objetivo). Si no aguantas 30s, hazlo en 2 series de 15s.' }
+  ]
+};
+
+// ============ STATE ============
+let state = {
+  log: {},          // { 'YYYY-MM-DD': { dayType, checked: [ids], note } }
+  wedgeShots: [],   // { date, club, swing, carry }
+  puttSessions: [], // { date, counts: {ladder_6, ...} }
+  puttDraft: {},    // current session counters
+  gymSets: [],      // { date, exercise, weight, reps, sets }
+  selectedDay: null, // override for what day to view
+  expandedItems: {} // { itemId: true } — which checklist items are expanded
+};
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      state = { ...state, ...saved, puttDraft: saved.puttDraft || {}, expandedItems: saved.expandedItems || {} };
+    }
+  } catch (e) { console.warn('Load error', e); }
+}
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch (e) { console.warn('Save error', e); }
+}
+
+// ============ UTILS ============
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function fmtDate(d) {
+  return `${DAYS_ES[d.getDay()]}, ${d.getDate()} de ${MONTHS_ES[d.getMonth()]}`;
+}
+function fmtShortDate(key) {
+  const [y, m, day] = key.split('-').map(Number);
+  return `${day} ${MONTHS_ES[m-1].slice(0,3)}`;
+}
+function avg(arr) {
+  if (!arr.length) return null;
+  return arr.reduce((s, x) => s + x, 0) / arr.length;
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ============ HEADER ============
+function renderHeader(tab) {
+  const h = document.getElementById('header');
+  const today = new Date();
+  const titles = {
+    hoy: { eyebrow: 'Tu día', title: `Hoy, <em>${DAYS_ES[today.getDay()].toLowerCase()}</em>`, sub: `${today.getDate()} de ${MONTHS_ES[today.getMonth()]}` },
+    wedges: { eyebrow: 'Calibración', title: 'Wedges', sub: 'Tu tabla personal de yardas' },
+    putts: { eyebrow: 'Práctica', title: 'Putts', sub: 'Control de distancia y presión' },
+    gym: { eyebrow: 'Acondicionamiento', title: 'Gym', sub: 'Progresión semana a semana' }
+  };
+  const t = titles[tab];
+  h.innerHTML = `
+    <div class="text">
+      <div class="eyebrow">${t.eyebrow}</div>
+      <div class="title">${t.title}</div>
+      <div class="sub">${t.sub}</div>
+    </div>
+    <button class="header-icon" id="open-data" aria-label="Datos">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="5" cy="12" r="1.8"/>
+        <circle cx="12" cy="12" r="1.8"/>
+        <circle cx="19" cy="12" r="1.8"/>
+      </svg>
+    </button>
+  `;
+  document.getElementById('open-data').addEventListener('click', openDataMenu);
+}
+
+// ============ HOY (TODAY) ============
+function getActiveDayKey() {
+  return state.selectedDay || todayKey();
+}
+function getDayTypeForKey(key) {
+  // Allow per-day override stored in log; otherwise from schedule
+  if (state.log[key]?.dayType) return state.log[key].dayType;
+  const [y, m, d] = key.split('-').map(Number);
+  const dt = new Date(y, m-1, d);
+  return SCHEDULE[dt.getDay()];
+}
+function renderHoy() {
+  const container = document.getElementById('hoy-content');
+  const dayKey = getActiveDayKey();
+  const isToday = dayKey === todayKey();
+  const dayType = getDayTypeForKey(dayKey);
+  const routine = ROUTINES[dayType];
+  const log = state.log[dayKey] || { checked: [], note: '' };
+
+  const total = routine.items.length;
+  const done = routine.items.filter(it => log.checked.includes(it.id)).length;
+  const pct = Math.round((done / total) * 100);
+
+  // Day switcher (allow change of day type if user wants to swap)
+  const switcherHtml = `
+    <div class="day-switcher">
+      <button class="day-pill ${dayType === 'sim_wedge' ? 'active' : ''}" data-switch="sim_wedge">Sim Wedges</button>
+      <button class="day-pill ${dayType === 'sim_driver' ? 'active' : ''}" data-switch="sim_driver">Sim Driver</button>
+      <button class="day-pill ${dayType === 'club_a' ? 'active' : ''}" data-switch="club_a">Club + Gym A</button>
+      <button class="day-pill ${dayType === 'club_b' ? 'active' : ''}" data-switch="club_b">Club + Gym B</button>
+      <button class="day-pill ${dayType === 'rest' ? 'active' : ''}" data-switch="rest">Descanso</button>
+    </div>
+  `;
+
+  container.innerHTML = `
+    ${switcherHtml}
+    <div class="day-banner">
+      <div class="label">${isToday ? 'Hoy' : 'Día seleccionado'}</div>
+      <div class="name">${routine.name}</div>
+      <div class="meta">
+        <span>${routine.duration}</span>
+        <span>·</span>
+        <span>${done}/${total} completados</span>
+      </div>
+      <svg class="progress-ring" width="56" height="56" viewBox="0 0 56 56">
+        <circle cx="28" cy="28" r="24" stroke="rgba(255,255,255,0.2)" stroke-width="3" fill="none"/>
+        <circle cx="28" cy="28" r="24" stroke="#C45A2C" stroke-width="3" fill="none"
+          stroke-dasharray="${2*Math.PI*24}"
+          stroke-dashoffset="${2*Math.PI*24 * (1-pct/100)}"
+          stroke-linecap="round"
+          transform="rotate(-90 28 28)"/>
+        <text x="28" y="32" text-anchor="middle" fill="white" font-size="13" font-weight="600" font-family="JetBrains Mono">${pct}%</text>
+      </svg>
+    </div>
+
+    <ul class="checklist">
+      ${routine.items.map(it => {
+        const isDone = log.checked.includes(it.id);
+        const isExpanded = state.expandedItems[it.id];
+        return `
+          <li class="check-item ${isDone ? 'done' : ''} ${isExpanded ? 'expanded' : ''}" data-item-id="${it.id}">
+            <div class="check-item-row">
+              <div class="check-box" data-action="toggle">
+                <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="2.5 7 5.5 10 11.5 4"/>
+                </svg>
+              </div>
+              <div class="check-content" data-action="expand">
+                <div class="check-label">
+                  <span class="label-text">${it.label}</span>
+                  ${it.target ? `<span class="label-target">${it.target}</span>` : ''}
+                </div>
+                ${it.goal ? `<div class="check-goal">${it.goal}</div>` : ''}
+                ${(it.setup || it.cue) ? `
+                  <button class="check-expand-btn">
+                    <span>${isExpanded ? 'ocultar' : 'detalles'}</span>
+                    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 5 6 8 9 5"/></svg>
+                  </button>
+                  <div class="check-details">
+                    ${it.setup ? `<div class="row-label">Setup</div><div class="row-content">${it.setup}</div>` : ''}
+                    ${it.cue ? `<div class="row-label">Tip clave</div><div class="row-content">${it.cue}</div>` : ''}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </li>
+        `;
+      }).join('')}
+    </ul>
+
+    <div class="card mt-3">
+      <div class="card-subtle">Notas del día</div>
+      <textarea class="note-area" id="day-note" placeholder="¿Qué funcionó? ¿Qué números viste en el Trackman? ¿Qué corregir?">${log.note || ''}</textarea>
+    </div>
+
+    <div class="past-days-link" id="show-past-link">Ver días anteriores →</div>
+  `;
+
+  // Wire up
+  container.querySelectorAll('.check-item').forEach(el => {
+    const itemId = el.dataset.itemId;
+    el.querySelector('.check-box').addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleCheck(itemId);
+    });
+    el.querySelector('.check-content').addEventListener('click', () => toggleExpand(itemId));
+  });
+  container.querySelectorAll('[data-switch]').forEach(el => {
+    el.addEventListener('click', () => switchDayType(el.dataset.switch));
+  });
+  document.getElementById('day-note').addEventListener('input', (e) => {
+    saveDayNote(e.target.value);
+  });
+  document.getElementById('show-past-link').addEventListener('click', showPastDays);
+}
+
+function toggleCheck(itemId) {
+  const key = getActiveDayKey();
+  const dayType = getDayTypeForKey(key);
+  if (!state.log[key]) state.log[key] = { dayType, checked: [], note: '' };
+  const log = state.log[key];
+  if (log.checked.includes(itemId)) {
+    log.checked = log.checked.filter(x => x !== itemId);
+  } else {
+    log.checked.push(itemId);
+  }
+  save();
+  renderHoy();
+}
+
+function toggleExpand(itemId) {
+  state.expandedItems[itemId] = !state.expandedItems[itemId];
+  save();
+  renderHoy();
+}
+
+function switchDayType(newType) {
+  const key = getActiveDayKey();
+  if (!state.log[key]) state.log[key] = { dayType: newType, checked: [], note: '' };
+  state.log[key].dayType = newType;
+  state.log[key].checked = []; // reset since items are different
+  save();
+  renderHoy();
+}
+
+function saveDayNote(text) {
+  const key = getActiveDayKey();
+  const dayType = getDayTypeForKey(key);
+  if (!state.log[key]) state.log[key] = { dayType, checked: [], note: '' };
+  state.log[key].note = text;
+  save();
+}
+
+function showPastDays() {
+  const entries = Object.entries(state.log)
+    .filter(([k, v]) => k !== todayKey() && (v.checked.length > 0 || v.note))
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .slice(0, 30);
+
+  const html = `
+    <h3>Días anteriores</h3>
+    <p class="sub">Tus últimos ${entries.length} días con actividad.</p>
+    ${entries.length === 0 ? '<div class="empty-state">Sin registros todavía.</div>' : ''}
+    ${entries.map(([key, log]) => {
+      const routine = ROUTINES[log.dayType];
+      const total = routine?.items.length || 0;
+      const [y, m, d] = key.split('-').map(Number);
+      const dt = new Date(y, m-1, d);
+      return `
+        <div class="past-day">
+          <div class="row-flex">
+            <div>
+              <div class="date">${DAYS_ES[dt.getDay()]} ${d} ${MONTHS_ES[m-1].slice(0,3)}</div>
+              <div class="completion">${routine?.name || log.dayType} · ${log.checked.length}/${total}</div>
+            </div>
+          </div>
+          ${log.note ? `<div class="note">${escapeHtml(log.note)}</div>` : ''}
+        </div>
+      `;
+    }).join('')}
+    <div class="modal-actions">
+      <button class="btn secondary" id="modal-close">Cerrar</button>
+    </div>
+  `;
+  openModal(html);
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ============ WEDGES (option B: avg per session, tap cell to log) ============
+const WEDGE_CLUBS = ['56', '52', 'PW'];
+const WEDGE_SWINGS = ['9oc', '1030', 'full'];
+const SWING_LABELS = { '9oc': '9 en punto', '1030': '10:30', 'full': 'Completo' };
+const CLUB_LABELS = { '56': '56°', '52': '52°', 'PW': 'PW' };
+
+function renderWedges() {
+  renderWedgeTable();
+  renderWedgeHistory();
+}
+
+function renderWedgeTable() {
+  const cellFor = (club, swing) => {
+    const carries = state.wedgeShots
+      .filter(s => s.club === club && s.swing === swing)
+      .slice(-5)
+      .map(s => s.carry);
+    if (!carries.length) {
+      return `<div class="yardage"><span class="empty">—</span></div>
+        <span class="sample-count">tap para registrar</span>`;
+    }
+    const a = avg(carries);
+    return `<div class="yardage">${a.toFixed(0)}<span class="unit">yds</span></div>
+      <span class="sample-count">${carries.length} ${carries.length === 1 ? 'registro' : 'registros'}</span>`;
+  };
+
+  document.getElementById('wedge-table-container').innerHTML = `
+    <div class="wedge-grid">
+      <div class="wedge-grid-header">
+        <h3>Carry promedio</h3>
+        <p>Promedio de tus últimas 5 sesiones · toca una celda para registrar</p>
+      </div>
+      <table class="wedge-table">
+        <thead>
+          <tr>
+            <th></th>
+            ${WEDGE_SWINGS.map(s => `<th>${SWING_LABELS[s]}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${WEDGE_CLUBS.map(c => `
+            <tr>
+              <td>${CLUB_LABELS[c]}</td>
+              ${WEDGE_SWINGS.map(s => `<td class="wedge-cell" data-club="${c}" data-swing="${s}">${cellFor(c, s)}</td>`).join('')}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  document.querySelectorAll('.wedge-cell').forEach(cell => {
+    cell.addEventListener('click', () => openWedgeLogger(cell.dataset.club, cell.dataset.swing));
+  });
+}
+
+function openWedgeLogger(club, swing) {
+  const recent = state.wedgeShots
+    .filter(s => s.club === club && s.swing === swing)
+    .slice(-5)
+    .reverse();
+  const last = recent[0];
+  const html = `
+    <h3>${CLUB_LABELS[club]} · ${SWING_LABELS[swing]}</h3>
+    <p class="sub">Carry promedio de tu sesión de hoy en esta combinación.</p>
+
+    <span class="modal-input-label">Carry promedio (yardas)</span>
+    <input type="number" class="modal-input" id="wedge-carry" placeholder="${last?.carry ?? '—'}" inputmode="decimal" autofocus />
+
+    ${recent.length ? `
+      <div class="card-subtle mt-3">Últimos registros</div>
+      <div class="history-list">
+        ${recent.map(s => `
+          <div class="history-entry">
+            <div class="meta">${fmtShortDate(s.date)}</div>
+            <div class="value">${s.carry} yds</div>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    <div class="modal-actions">
+      <button class="btn secondary" id="modal-close">Cancelar</button>
+      <button class="btn" id="wedge-save">Guardar</button>
+    </div>
+  `;
+  openModal(html);
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  setTimeout(() => document.getElementById('wedge-carry')?.focus(), 100);
+  document.getElementById('wedge-save').addEventListener('click', () => {
+    const carry = parseFloat(document.getElementById('wedge-carry').value);
+    if (!carry || carry < 5 || carry > 200) { showToast('Carry inválido'); return; }
+    state.wedgeShots.push({ date: todayKey(), club, swing, carry });
+    save();
+    closeModal();
+    renderWedges();
+    showToast('Registrado');
+  });
+}
+
+function renderWedgeHistory() {
+  const recent = [...state.wedgeShots].slice(-12).reverse();
+  document.getElementById('wedge-history').innerHTML = recent.length === 0
+    ? '<div class="empty-state">Sin registros aún. Toca cualquier celda para empezar.</div>'
+    : recent.map(s => `
+        <div class="history-entry">
+          <div>
+            <div>${CLUB_LABELS[s.club]} · ${SWING_LABELS[s.swing]}</div>
+            <div class="meta">${fmtShortDate(s.date)}</div>
+          </div>
+          <div class="value">${s.carry} yds</div>
+        </div>
+      `).join('');
+}
+
+function setupWedgeForm() {
+  // Clear button (the only button outside the modal)
+  const clearBtn = document.getElementById('wedge-clear-btn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      if (confirm('¿Borrar todo el histórico de wedges? No se puede deshacer.')) {
+        state.wedgeShots = [];
+        save();
+        renderWedges();
+      }
+    });
+  }
+}
+
+// ============ PUTTS ============
+function renderPutts() {
+  renderPuttStats();
+  renderPuttCounters();
+  renderPuttHistory();
+}
+
+function renderPuttStats() {
+  // last 5 sessions average
+  const sessions = state.puttSessions.slice(-5);
+  if (!sessions.length) {
+    document.getElementById('putt-stats').innerHTML = '';
+    return;
+  }
+  const ladderTotal = sessions.reduce((s, ses) => {
+    return s + (ses.counts.ladder_6 || 0) + (ses.counts.ladder_12 || 0) +
+              (ses.counts.ladder_18 || 0) + (ses.counts.ladder_24 || 0);
+  }, 0);
+  const ladderMax = sessions.length * 16;
+  const ladderPct = ladderMax > 0 ? Math.round((ladderTotal / ladderMax) * 100) : 0;
+
+  const shortTotal = sessions.reduce((s, ses) => {
+    return s + (ses.counts.short_1 || 0) + (ses.counts.short_2 || 0) + (ses.counts.short_3 || 0);
+  }, 0);
+  const shortMax = sessions.length * 30;
+  const shortPct = shortMax > 0 ? Math.round((shortTotal / shortMax) * 100) : 0;
+
+  document.getElementById('putt-stats').innerHTML = `
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="label">Ladder · últimas ${sessions.length}</div>
+        <div class="value">${ladderPct}%</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Cortos · últimas ${sessions.length}</div>
+        <div class="value accent">${shortPct}%</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPuttCounters() {
+  const limits = {
+    ladder_6: 4, ladder_12: 4, ladder_18: 4, ladder_24: 4,
+    short_1: 10, short_2: 10, short_3: 10
+  };
+  Object.keys(limits).forEach(k => {
+    const v = state.puttDraft[k] || 0;
+    const el = document.getElementById('cnt-' + k);
+    if (el) el.textContent = `${v}/${limits[k]}`;
+  });
+}
+
+function setupPutts() {
+  const limits = {
+    ladder_6: 4, ladder_12: 4, ladder_18: 4, ladder_24: 4,
+    short_1: 10, short_2: 10, short_3: 10
+  };
+  document.querySelectorAll('[data-putt-key]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.puttKey;
+      const action = btn.dataset.action;
+      const max = limits[key];
+      let v = state.puttDraft[key] || 0;
+      if (action === 'inc' && v < max) v++;
+      if (action === 'dec' && v > 0) v--;
+      state.puttDraft[key] = v;
+      save();
+      renderPuttCounters();
+    });
+  });
+
+  document.getElementById('putt-save-btn').addEventListener('click', () => {
+    const counts = { ...state.puttDraft };
+    const total = Object.values(counts).reduce((s, x) => s + (x || 0), 0);
+    if (total === 0) {
+      showToast('Nada para guardar');
+      return;
+    }
+    state.puttSessions.push({
+      date: todayKey(),
+      counts
+    });
+    state.puttDraft = {};
+    save();
+    renderPutts();
+    showToast('Sesión guardada');
+  });
+}
+
+function renderPuttHistory() {
+  const recent = [...state.puttSessions].slice(-8).reverse();
+  if (recent.length === 0) {
+    document.getElementById('putt-history').innerHTML = '<div class="empty-state">Sin sesiones aún.</div>';
+    return;
+  }
+  document.getElementById('putt-history').innerHTML = recent.map(s => {
+    const ladder = (s.counts.ladder_6||0)+(s.counts.ladder_12||0)+(s.counts.ladder_18||0)+(s.counts.ladder_24||0);
+    const shorts = (s.counts.short_1||0)+(s.counts.short_2||0)+(s.counts.short_3||0);
+    return `
+      <div class="history-entry">
+        <div>
+          <div>Sesión</div>
+          <div class="meta">${fmtShortDate(s.date)}</div>
+        </div>
+        <div class="value">L: ${ladder}/16 · C: ${shorts}/30</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============ GYM ============
+function renderGym() {
+  const container = document.getElementById('gym-list');
+  let html = '';
+  Object.entries(GYM_EXERCISES).forEach(([groupName, exercises]) => {
+    html += `<div class="exercise-group-title">${groupName}</div>`;
+    exercises.forEach(ex => {
+      const sets = state.gymSets.filter(s => s.exercise === ex.id);
+      const last = sets[sets.length - 1];
+      const lastTxt = last
+        ? `Última: ${last.weight}kg × ${last.reps} × ${last.sets} series · ${fmtShortDate(last.date)}`
+        : `Sin registros · objetivo ${ex.target}`;
+      html += `
+        <div class="exercise-item" data-exercise="${ex.id}">
+          <div class="info">
+            <div class="name">${ex.name}</div>
+            <div class="last">${lastTxt}</div>
+          </div>
+          <div class="arrow">›</div>
+        </div>
+      `;
+    });
+  });
+  container.innerHTML = html;
+  container.querySelectorAll('.exercise-item').forEach(el => {
+    el.addEventListener('click', () => openGymLogger(el.dataset.exercise));
+  });
+}
+
+function findExercise(exId) {
+  for (const exercises of Object.values(GYM_EXERCISES)) {
+    const found = exercises.find(e => e.id === exId);
+    if (found) return found;
+  }
+  return null;
+}
+
+function openGymLogger(exId) {
+  const ex = findExercise(exId);
+  if (!ex) return;
+  const sets = state.gymSets.filter(s => s.exercise === exId).slice(-5).reverse();
+  const last = sets[0];
+  const html = `
+    <h3>${ex.name}</h3>
+    <p class="sub">Objetivo: ${ex.target}</p>
+
+    <div class="technique-block">
+      <h4>Cómo hacerlo</h4>
+      <p>${ex.description}</p>
+      <ul>${ex.cues.map(c => `<li>${c}</li>`).join('')}</ul>
+    </div>
+
+    ${ex.mistakes ? `
+      <div class="technique-block warning">
+        <h4>Errores comunes</h4>
+        <p>${ex.mistakes}</p>
+      </div>
+    ` : ''}
+
+    <div class="row">
+      <div>
+        <span class="modal-input-label">Peso (kg)</span>
+        <input type="number" class="modal-input" id="gym-weight" placeholder="${last?.weight ?? '—'}" inputmode="decimal" />
+      </div>
+      <div>
+        <span class="modal-input-label">Reps</span>
+        <input type="number" class="modal-input" id="gym-reps" placeholder="${last?.reps ?? '—'}" inputmode="numeric" />
+      </div>
+      <div>
+        <span class="modal-input-label">Series</span>
+        <input type="number" class="modal-input" id="gym-sets" placeholder="${last?.sets ?? 3}" inputmode="numeric" />
+      </div>
+    </div>
+
+    ${sets.length ? `
+      <div class="card-subtle mt-3">Últimos registros</div>
+      <div class="history-list">
+        ${sets.map(s => `
+          <div class="history-entry">
+            <div class="meta">${fmtShortDate(s.date)}</div>
+            <div class="value">${s.weight}kg × ${s.reps} × ${s.sets}</div>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    <div class="modal-actions">
+      <button class="btn secondary" id="modal-close">Cerrar</button>
+      <button class="btn" id="gym-save">Guardar</button>
+    </div>
+  `;
+  openModal(html);
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('gym-save').addEventListener('click', () => {
+    const weight = parseFloat(document.getElementById('gym-weight').value);
+    const reps = parseInt(document.getElementById('gym-reps').value);
+    const setsCount = parseInt(document.getElementById('gym-sets').value) || 3;
+    if (isNaN(weight) || isNaN(reps)) {
+      showToast('Falta peso o reps');
+      return;
+    }
+    state.gymSets.push({
+      date: todayKey(),
+      exercise: exId,
+      weight, reps, sets: setsCount
+    });
+    save();
+    closeModal();
+    renderGym();
+    showToast('Registrado');
+  });
+}
+
+// ============ MODAL ============
+// ============ DATA MENU (export / import / reset) ============
+function openDataMenu() {
+  const counts = {
+    days: Object.keys(state.log).length,
+    wedges: state.wedgeShots.length,
+    putts: state.puttSessions.length,
+    gym: state.gymSets.length
+  };
+  const html = `
+    <h3>Datos</h3>
+    <p class="sub">Exporta tus datos para que tu coach los analice, o importa una versión actualizada.</p>
+
+    <div class="technique-block">
+      <h4>Tus datos guardados</h4>
+      <p>${counts.days} días registrados · ${counts.wedges} tiros de wedge · ${counts.putts} sesiones de putt · ${counts.gym} sets de gym</p>
+    </div>
+
+    <button class="btn" id="data-export">Descargar JSON</button>
+    <button class="btn outline" id="data-export-copy">Copiar al portapapeles</button>
+    <button class="btn outline" id="data-import-show">Importar JSON</button>
+
+    <div id="data-import-area" style="display:none; margin-top: 14px;">
+      <span class="modal-input-label">Pega el JSON aquí</span>
+      <textarea class="data-textarea" id="data-import-text" placeholder='{"log":{},"wedgeShots":[]...}'></textarea>
+      <button class="btn" id="data-import-go">Importar y reemplazar</button>
+    </div>
+
+    <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border);">
+      <button class="btn danger" id="data-reset">Borrar todos los datos</button>
+    </div>
+
+    <div style="margin-top: 18px; text-align: center; font-size: 11px; color: var(--text-3); font-family: var(--mono);">v2 · 10 may</div>
+
+    <div class="modal-actions">
+      <button class="btn secondary" id="modal-close">Cerrar</button>
+    </div>
+  `;
+  openModal(html);
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+
+  document.getElementById('data-export').addEventListener('click', () => {
+    const blob = new Blob([exportData()], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `golf-coach-${todayKey()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Descargado');
+  });
+
+  document.getElementById('data-export-copy').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(exportData());
+      showToast('Copiado al portapapeles');
+    } catch (e) {
+      showToast('No se pudo copiar');
+    }
+  });
+
+  document.getElementById('data-import-show').addEventListener('click', () => {
+    document.getElementById('data-import-area').style.display = 'block';
+  });
+
+  document.getElementById('data-import-go').addEventListener('click', () => {
+    const txt = document.getElementById('data-import-text').value.trim();
+    if (!txt) { showToast('Pega el JSON primero'); return; }
+    try {
+      const parsed = JSON.parse(txt);
+      if (!parsed.log && !parsed.wedgeShots) { showToast('JSON inválido'); return; }
+      if (!confirm('Esto va a reemplazar todos tus datos actuales. ¿Continuar?')) return;
+      state = {
+        log: parsed.log || {},
+        wedgeShots: parsed.wedgeShots || [],
+        puttSessions: parsed.puttSessions || [],
+        puttDraft: parsed.puttDraft || {},
+        gymSets: parsed.gymSets || [],
+        selectedDay: null,
+        expandedItems: parsed.expandedItems || {}
+      };
+      save();
+      closeModal();
+      switchTab('hoy');
+      showToast('Datos importados');
+    } catch (e) {
+      showToast('JSON con errores');
+    }
+  });
+
+  document.getElementById('data-reset').addEventListener('click', () => {
+    if (!confirm('¿Borrar TODO? Esto no se puede deshacer.')) return;
+    if (!confirm('De verdad de verdad?')) return;
+    state = { log: {}, wedgeShots: [], puttSessions: [], puttDraft: {}, gymSets: [], selectedDay: null, expandedItems: {} };
+    save();
+    closeModal();
+    switchTab('hoy');
+    showToast('Datos borrados');
+  });
+}
+
+function exportData() {
+  return JSON.stringify({
+    exportedAt: new Date().toISOString(),
+    version: 1,
+    log: state.log,
+    wedgeShots: state.wedgeShots,
+    puttSessions: state.puttSessions,
+    gymSets: state.gymSets
+  }, null, 2);
+}
+
+// ============ MODAL ============
+function openModal(html) {
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-backdrop').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('show');
+}
+document.getElementById('modal-backdrop').addEventListener('click', (e) => {
+  if (e.target.id === 'modal-backdrop') closeModal();
+});
+
+// ============ TABS ============
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === 'sec-' + name));
+  renderHeader(name);
+  if (name === 'hoy') renderHoy();
+  if (name === 'wedges') renderWedges();
+  if (name === 'putts') renderPutts();
+  if (name === 'gym') renderGym();
+  document.querySelector('.main').scrollTop = 0;
+}
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => switchTab(t.dataset.tab));
+});
+
+// ============ INIT ============
+try {
+  load();
+  renderHeader('hoy');
+  renderHoy();
+  setupWedgeForm();
+  setupPutts();
+} catch (e) {
+  document.body.innerHTML = `<div style="padding:40px 24px; font-family: -apple-system, sans-serif; color: #1A1F1B;">
+    <h2 style="margin-bottom: 12px;">Algo se rompió al cargar</h2>
+    <p style="font-size: 13px; line-height: 1.5; margin-bottom: 16px;">Mándale screenshot del siguiente error al coach:</p>
+    <pre style="background: #F3EFE8; padding: 12px; border-radius: 8px; font-size: 11px; white-space: pre-wrap; word-break: break-word;">${e.message}\n\n${e.stack || ''}</pre>
+  </div>`;
+}
+</script>
+</body>
+</html>
